@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 
-resource "aws_s3_bucket" "bucket" {
+resource "aws_s3_bucket" "demo" {
   bucket = "${var.prefix}-${var.name}"
   acl    = "public-read"
 
@@ -45,12 +45,18 @@ EOF
   force_destroy = true
 }
 
+resource "aws_s3_bucket_website_configuration" "demo" {
+  bucket = aws_s3_bucket.demo.id
 
-resource "aws_s3_bucket_object" "webapp" {
-  acl          = "public-read"
-  key          = "index.html"
-  bucket       = aws_s3_bucket.bucket.id
-  content      = file("${path.module}/assets/index.html")
-  content_type = "text/html"
+  index_document {
+    suffix = "index.html"
+    content      = file("${path.module}/assets/index.html")
+    content_type = "text/html"
+    acl          = "public-read"
+  }
 
+  error_document {
+    key = "error.html"
+  }
 }
+
