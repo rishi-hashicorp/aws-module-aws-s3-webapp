@@ -1,4 +1,20 @@
-resource "aws_s3_bucket" "bucket" {
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
+    }
+  }
+
+  required_version = ">= 1.2.0"
+}
+
+provider "aws" {
+  region  = "us-east-1"
+}
+
+
+resource "aws_s3_bucket" "demo" {
   bucket = "${var.prefix}-${var.name}"
   acl    = "public-read"
 
@@ -29,12 +45,18 @@ EOF
   force_destroy = true
 }
 
+resource "aws_s3_bucket_website_configuration" "demo" {
+  bucket = aws_s3_bucket.demo.id
 
-resource "aws_s3_bucket_object" "webapp" {
-  acl          = "public-read"
-  key          = "index.html"
-  bucket       = aws_s3_bucket.bucket.id
-  content      = file("${path.module}/assets/index.html")
-  content_type = "text/html"
+  index_document {
+    suffix = "index.html"
+    content      = file("${path.module}/assets/index.html")
+    content_type = "text/html"
+    acl          = "public-read"
+  }
 
+  error_document {
+    key = "error.html"
+  }
 }
+
